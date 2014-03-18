@@ -300,7 +300,8 @@ optional packages."
  '(yas-trigger-key nil)
  '(yas-wrap-around-region t)
  '(url-proxy-services '("http"  . "proxy.smarteye.se:8080")
-                      '("https" . "proxy.smarteye.se:8080")))
+                      '("https" . "proxy.smarteye.se:8080"))
+ )
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
