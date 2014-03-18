@@ -298,8 +298,8 @@ optional packages."
  '(yas-trigger-key nil)
  '(yas-triggers-in-field t)
  '(yas-wrap-around-region t)
- '(url-proxy-services '("http"  . "proxy.smarteye.se:8080")
-                      '("https" . "proxy.smarteye.se:8080"))
+ '(url-proxy-services '(("http"  . "proxy.smarteye.se:8080")
+			("https" . "proxy.smarteye.se:8080")))
  )
 
 
