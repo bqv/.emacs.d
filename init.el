@@ -69,6 +69,7 @@
 
 (add-hook 'cmake-mode-hook
   (lambda ()
+    (setq mode-name "CM")
     (when (fboundp 'company-mode) (company-mode))
     (set (make-local-variable 'company-backends)
       '((company-cmake company-files company-dabbrev company-dabbrev-code)))
@@ -297,7 +298,6 @@ optional packages."
  '(yas-prompt-functions (quote (yas-popup-isearch-prompt)))
  '(yas-trigger-key nil)
  '(yas-triggers-in-field t)
- '(yas-trigger-key nil)
  '(yas-wrap-around-region t)
  '(url-proxy-services '("http"  . "proxy.smarteye.se:8080")
                       '("https" . "proxy.smarteye.se:8080"))
