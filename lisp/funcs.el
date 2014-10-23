@@ -39,6 +39,18 @@
 
 ;;; Code:
 
+(defun my/diminish-many (modes-labels)
+  "Shorten or remove the label of all modes in MODES-LABELS."
+  (dolist (mode-label modes-labels)
+    (let* ((mode  (car mode-label))
+           (label (cdr mode-label)))
+      (add-hook mode )
+      )))
+
+(defun my/diminish (mode label)
+
+  )
+
 (defun my/auto-modes (modes)
   "Add many MODES to `auto-mode-alist'."
   (setq auto-mode-alist (append modes auto-mode-alist))
