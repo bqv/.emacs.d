@@ -46,6 +46,9 @@
  '(aggressive-indent-excluded-modes
    (quote
     (text-mode tabulated-list-mode special-mode minibuffer-inactive-mode bibtex-mode yaml-mode jabber-chat-mode lisp-interaction-mode)))
+ '(auto-insert (quote not-modified))
+ '(auto-insert-directory "~/.emacs.d/templates/")
+ '(auto-insert-mode t)
  '(column-number-mode t)
  '(company-auto-complete t)
  '(company-auto-complete-chars (quote (32 46)))

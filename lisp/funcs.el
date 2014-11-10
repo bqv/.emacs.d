@@ -40,6 +40,11 @@
 ;;; Code:
 
 ;;;###autoload
+(defun my/autoinsert-yas-expand()
+  "Replace text in yasnippet template."
+  (yas-expand-snippet (buffer-string) (point-min) (point-max)))
+
+;;;###autoload
 (defun my/maximize ()
   "Maximize Emacs."
   (interactive)
