@@ -61,7 +61,8 @@
    ;; Global overrides
    ( "C-x 1"       .  zygospore-toggle-delete-other-windows)
    ( "M-x"         .  smex)
-
+   ( "<escape>"    .  god-mode-all)
+   
    ;; Windows
    ( "C-c w c"     .  customize)
    ( "C-c w p"     .  list-packages)
@@ -237,6 +238,75 @@
                               ("C-c d"      . godoc-at-point)
                               ("C-<return>" . godef-jump)))))
 
+;; God
+(defun my/god-update-cursor ()
+  "Change the cursor style to indicate whether god-mode is active or not."
+  (setq cursor-type
+        (if (or god-local-mode buffer-read-only)
+            'box
+          'bar)))
+
+(add-hook 'god-mode-enabled-hook
+          (lambda()
+            (my/god-update-cursor)
+            (my/define-keys god-local-mode-map
+                            '(("."         . repeat)
+                              ("i"         . god-mode-all)
+                              ("x 1"       . zygospore-toggle-delete-other-windows)
+                              ("x 2"       . split-window-below)
+                              ("x 3"       . split-window-right)
+
+                              ;; Rectangles
+                              ("x r N"     . rectangle-number-lines)
+                              ("x r c"     . clear-rectangle)
+                              ("x r d"     . delete-rectangle)
+                              ("x r k"     . kill-rectangle)
+                              ("x r o"     . open-rectangle)
+                              ("x r t"     . string-rectangle)
+                              ("x r y"     . yank-rectangle)
+
+                              ;; Projectile
+                              ("p 4 a"     . projectile-find-other-file-other-window)
+                              ("p 4 b"     . projectile-switch-to-buffer-other-window)
+                              ("p 4 C-o"   . projectile-display-buffer)
+                              ("p 4 d"     . projectile-find-dir-other-window)
+                              ("p 4 f"     . projectile-find-file-other-window)
+                              ("p 4 g"     . projectile-find-file-dwim-other-window)
+                              ("p 4 t"     . projectile-find-implementation-or-test-other-window)
+                              ("p !"       . projectile-run-shell-command-in-root)
+                              ("p &"       . projectile-run-async-shell-command-in-root)
+                              ("p a"       . projectile-find-other-file)
+                              ("p b"       . projectile-switch-to-buffer)
+                              ("p c"       . projectile-compile-project)
+                              ("p d"       . projectile-find-dir)
+                              ("p D"       . projectile-dired)
+                              ("p e"       . projectile-recentf)
+                              ("p f"       . projectile-find-file)
+                              ("p g"       . projectile-find-file-dwim)
+                              ("p F"       . projectile-find-file-in-known-projects)
+                              ("p i"       . projectile-invalidate-cache)
+                              ("p I"       . projectile-ibuffer)
+                              ("p j"       . projectile-find-tag)
+                              ("p k"       . projectile-kill-buffers)
+                              ("p l"       . projectile-find-file-in-directory)
+                              ("p m"       . projectile-commander)
+                              ("p o"       . projectile-multi-occur)
+                              ("p p"       . projectile-switch-project)
+                              ("p P"       . projectile-test-project)
+                              ("p r"       . projectile-replace)
+                              ("p R"       . projectile-regenerate-tags)
+                              ("p s a"     . projectile-ack)
+                              ("p s g"     . projectile-grep)
+                              ("p s s"     . projectile-ag)
+                              ("p S"       . projectile-save-project-buffers)
+                              ("p t"       . projectile-toggle-between-implementation-and-test)
+                              ("p T"       . projectile-find-test-file)
+                              ("p v"       . projectile-vc)
+                              ("p z"       . projectile-cache-current-file)
+                              ("p ESC"     . projectile-project-buffers-other-buffer))
+                            )))
+(add-hook 'god-mode-disabled-hook 'my/god-update-cursor)
+
 ;; Magit
 (add-hook 'git-commit-mode-hook
           (lambda ()
@@ -353,6 +423,7 @@
     (setq-default projectile-indexing-method 'native))
 
   ;; Activate a bunch of global modes
+  (god-mode-all)
   (yas-global-mode)
   (global-git-gutter-mode)
   (projectile-global-mode)
