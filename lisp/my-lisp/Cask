@@ -1,0 +1,7 @@
+(source gnu)
+(source melpa)
+
+(package-file "my-lisp.el")
+
+(development
+ (depends-on "yasnippet"))

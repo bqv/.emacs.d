@@ -1,0 +1,3 @@
+(package-file "my-commands.el")
+
+(development)

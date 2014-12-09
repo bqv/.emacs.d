@@ -1,11 +1,11 @@
-;;; funcs.el --- Some functions and macros I use.    -*- lexical-binding: t; -*-
+;;; my-lisp.el --- Some functions and macros I use. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013, 2014 Mattias Bengtsson
 
 ;; Author: Mattias Bengtsson <mattias.jc.bengtsson@gmail.com>
 ;; Version: 20141020
 ;; Keywords: extensions, tools
-;; Package-Requires: ()
+;; Package-Requires: ((yasnippet "20141117.327"))
 ;; URL: TBA
 ;; Doc URL: TBA
 ;; Compatibility: GNU Emacs: 24.x
@@ -39,17 +39,8 @@
 
 ;;; Code:
 
-;;;###autoload
-(defun my/maximize ()
-  "Maximize Emacs."
-  (interactive)
-  (when (display-graphic-p)
-    (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                           '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0))
-    (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                           '(2 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))))
+(require 'yasnippet)
 
-;;;###autoload
 (defun my/shorten-minor-modes (modes)
   "Shorten the displayed name for MODES in the modeline."
   (dolist (mode-and-line modes)
@@ -57,13 +48,11 @@
           (mode (car mode-and-line)))
       (my/shorten-minor-mode mode line))))
 
-;;;###autoload
 (defun my/shorten-minor-mode (mode line)
   "Replace the displayed name for MODE by LINE."
   (let ((hook (intern (concat (symbol-name mode) "-hook"))))
     (add-hook hook (lambda () (diminish mode line)))))
 
-;;;###autoload
 (defun my/shorten-major-modes (modes)
   "Shorten the displayed name for MODES in the modeline."
   (dolist (mode-and-line modes)
@@ -71,25 +60,15 @@
           (mode (car mode-and-line)))
       (my/shorten-major-mode mode line))))
 
-;;;###autoload
 (defun my/shorten-major-mode (mode line)
   "Replace the displayed name for MODE by LINE."
   (let ((hook (intern (concat (symbol-name mode) "-hook"))))
     (add-hook hook (lambda () (setq-local mode-name line)))))
 
-;;;###autoload
-(defun my/byte-compile ()
-  "Byte compile my configs."
-  (interactive)
-  (byte-recompile-directory "~/.emacs.d" 0))
-
-;;;###autoload
 (defun my/auto-modes (modes)
   "Add many MODES to `auto-mode-alist'."
-  (setq auto-mode-alist (append modes auto-mode-alist))
-  )
+  (setq auto-mode-alist (append modes auto-mode-alist)))
 
-;;;###autoload
 (defun my/global-set-keys (keybindings)
   "Set a bunch of global KEYBINDINGS at the same time."
   (dolist (binding keybindings)
@@ -97,13 +76,11 @@
            (func (cdr binding)))
       (global-set-key (kbd key) func))))
 
-;;;###autoload
 (defun my/mapcar-head (fn-head fn-rest list)
   "Like MAPCAR, but apply FN-HEAD to CAR and FN-REST to CDR of LIST."
   (if list (cons (funcall fn-head (car list))
                  (mapcar fn-rest (cdr list)))))
 
-;;;###autoload
 (defun my/split-name (s)
   "Split S by name."
   (split-string
@@ -112,31 +89,24 @@
       (replace-regexp-in-string "\\([a-z]\\)\\([A-Z]\\)" "\\1 \\2" s)))
    "[^A-Za-z0-9]+"))
 
-;;;###autoload
 (defun my/lower-camel-case (s)
   "Camel case S."
-  (interactive)
   (let ((names (my/split-name s)))
     (concat (downcase (car names))
-            (mapconcat 'capitalize (cdr names) ""))
-    ))
+            (mapconcat 'capitalize (cdr names) ""))))
 
-;;;###autoload
 (defun my/camel-case (s)
   "Camel case S."
   (mapconcat 'capitalize (my/split-name s) ""))
 
-;;;###autoload
 (defun my/snake-case (s)
   "Snake case S."
   (mapconcat 'downcase (my/split-name s) "_"))
 
-;;;###autoload
 (defun my/dash-case (s)
   "Dash case S."
   (mapconcat 'downcase (my/split-name s) "-"))
 
-;;;###autoload
 (defun my/toggle-programming-case (s)
   "Toggle programming style casing of S."
   (cond ((string-match-p "\\(?:[a-z]+_\\)+[a-z]+" s) (my/dash-case        s))
@@ -144,30 +114,16 @@
         ((string-match-p "^\\(?:[A-Z][a-z]+\\)+"  s) (my/lower-camel-case s))
         (t                                           (my/snake-case       s)) ))
 
-;;;###autoload
-(defun my/toggle-programming-case-word-at-point ()
-  "Toggle programming style casing of word a point."
-  (interactive)
-  (let* ((case-fold-search nil)
-         (beg (and (skip-chars-backward "[:alnum:]:_-") (point)))
-         (end (and (skip-chars-forward  "[:alnum:]:_-") (point)))
-         (txt (buffer-substring beg end))
-         (cml (my/toggle-programming-case txt)) )
-    (if cml (progn (delete-region beg end) (insert cml))) ))
-
-;;;###autoload
 (defun my/preceding-char-match-p (pattern)
   "Match preceding char with PATTERN."
   (let ((str (string (preceding-char))))
     (string-match-p pattern str)))
 
-;;;###autoload
 (defun my/following-char-match-p (pattern)
   "Match following char with PATTERN."
   (let ((str (string (following-char))))
     (string-match-p pattern str)))
 
-;;;###autoload
 (defun my/define-keys (mode-map keybindings)
   "Set a bunch of MODE-MAP specific KEYBINDINGS at the same time."
   (dolist (binding keybindings)
@@ -175,19 +131,6 @@
            (func (cdr binding)))
       (define-key mode-map (kbd key) func))))
 
-(defun my/insert-date (prefix)
-  "Insert the current date in ISO extended format.
-With PREFIX = 4, use ISO basic format.
-With PREFIX = 16, write out the day and month name."
-  (interactive "P")
-  (let ((format (cond
-                 ((not prefix) "%Y-%m-%d")
-                 ((equal prefix '(4)) "%Y%m%d")
-                 ((equal prefix '(16)) "%A, %d. %B %Y")))
-        (system-time-locale "en_US"))
-    (insert (format-time-string format))))
-
-;;;###autoload
 (defmacro my/bol-with-prefix (function)
   "Define a new function which call FUNCTION.
 Except it moves to beginning of line before calling FUNCTION when
@@ -204,45 +147,12 @@ called with a prefix argument.  The FUNCTION still receives the prefix argument.
          (call-interactively ',function))
        ',name)))
 
-;;;###autoload
-(defun my/rtags-start ()
-  "Start rdm if it isn't running."
-  (interactive)
-  (unless rtags-process (rtags-restart-process)))
-
-;;;###autoload
-(defun my/company-select-next-five ()
-  "A bit more eager `company-select-next'."
-  (interactive)
-  (dotimes (number 5 nil) (company-select-next)))
-
-;;;###autoload
-(defun my/company-select-previous-five ()
-  "A bit more eager `company-select-previous'."
-  (interactive)
-  (dotimes (number 5 nil) (company-select-previous)))
-
-;;;###autoload
 (defun my/yas-expand ()
   "Perform a `yas-expand' but return nil on failure."
   (if (not (yas-minor-mode)) nil
     (let ((yas-fallback-behavior 'return-nil))
       (yas-expand))))
 
-;;;###autoload
-(defun my/tab-indent-or-complete ()
-  "Tab indent or complete (using `company-mode') depending on context."
-  (interactive)
-  (if (minibufferp)
-      (minibuffer-complete)
-    (let ((old-indent (current-indentation)))
-      (indent-for-tab-command)
-      (if (and (= old-indent (current-indentation))
-               (my/preceding-char-match-p "[a-zA-Z\-\.\>\_\/\:]")
-               (null (my/yas-expand)))
-          (company-complete-common)))))
-
-;;;###autoload
 (defun yas-popup-isearch-prompt (prompt choices &optional display-fn)
   "Use popup.el for yasnippet.  (PROMPT, CHOICES, DISPLAY-FN)."
   (require 'popup)
@@ -259,57 +169,9 @@ called with a prefix argument.  The FUNCTION still receives the prefix argument.
    :isearch t
    ))
 
-;;;###autoload
 (defun my/wrap-in-comment (string)
   "Wrap STRING inside comment."
   (format "%s%s%s" comment-start string comment-end))
 
-;;;###autoload
-(defun my/toggle-comment ()
-  "Comments or uncomments current region or line."
-  (interactive)
-  (let (beg end)
-    (if (region-active-p)
-        (setq beg (region-beginning) end (region-end))
-      (setq beg (line-beginning-position) end (line-end-position)))
-    (comment-or-uncomment-region beg end)))
-
-;;;###autoload
-(defun my/rename-current-buffer-and-file ()
-  "Renames current buffer and file it is visiting."
-  (interactive)
-  (let ((name (buffer-name))
-        (filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
-        (error "Buffer '%s' is not visiting a file!" name)
-      (let ((new-name (read-file-name "New name: " filename)))
-        (if (get-buffer new-name)
-            (error "A buffer named '%s' already exists!" new-name)
-          (rename-file filename new-name 1)
-          (rename-buffer new-name)
-          (set-visited-file-name new-name)
-          (set-buffer-modified-p nil)
-          (message "File '%s' successfully renamed to '%s'"
-                   name (file-name-nondirectory new-name)))))))
-
-;;;###autoload
-(defun my/list-installed-packages ()
-  "Like `package-list-packages', but show only installed optional packages."
-  (interactive)
-  (package-initialize)
-  (package-show-package-list
-   (cl-remove-if-not (lambda (x) (and (not (package-built-in-p x))
-                                      (package-installed-p x)))
-                     (mapcar 'car package-archive-contents))))
-
-;;;###autoload
-(defun my/set-proxy ()
-  "Automatically set HTTP proxy in Emacs based on system environment."
-  (interactive)
-  (if (and (getenv "HTTP_PROXY") (getenv "HTTPS_PROXY"))
-      (setq-default url-proxy-services '(("http"  . (getenv "HTTP_PROXY"))
-                                         ("https" . (getenv "HTTPS_PROXY"))
-                                         ))))
-
-(provide 'funcs)
-;;; funcs.el ends here
+(provide 'my-lisp)
+;;; my-lisp.el ends here
