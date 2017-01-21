@@ -844,13 +844,16 @@ With a prefix ARG always prompt for command to use."
                        " && ")))
     (compile compile-cmd)))
 
-(defun my/find-git-projects (dir &optional depth)
-  "Find all git projects under DIR.
-Optionally only search as deep as DEPTH."
-  (let* ((depth-flag (if depth (format "-maxdepth %d" depth) ""))
-         (cmd (format "find %s %s -name '.git' -type d" dir depth-flag))
-         (result (split-string (shell-command-to-string cmd))))
-    (mapcar (lambda (s) (substring s 0 -4)) result)))
+(defun my/find-git-projects (path)
+  "Find all git projects under PATH."
+  (require 'f)
+  (mapcar #'f-dirname
+          (f-directories path
+                         (lambda (dir)
+                           (and (f-readable-p dir)
+                                (f-executable-p dir)
+                                (equal (f-filename dir) ".git")))
+                         t)))
 
 ;;;###autoload
 (defun my/projectile-index-projects ()
@@ -858,7 +861,7 @@ Optionally only search as deep as DEPTH."
   (interactive)
 
   (mapc #'projectile-add-known-project
-        (my/find-git-projects "~/" 5))
+        (my/find-git-projects "~/"))
 
   (projectile-cleanup-known-projects))
 
