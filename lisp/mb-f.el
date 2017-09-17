@@ -404,47 +404,32 @@ Meson projects Just Works™ and CMake will work automatically as
 well if you add this line:
     `cmakeargs = '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON''
 ... to your ~/.config/jhbuildrc"
-  (let* ((autotools (mb-f-projectile-autotools-p t))
-         (module    (projectile-project-name))
-         (src-dir   (projectile-project-root))
-         (build-dir (format "%s/%s" mb-f-jhbuild-build-path module))
-         (extra-cmd (if autotools
-                        (concat " cdcc-gen " src-dir
-                                " &&"
-                                (format " mv %s/compile_commands.json %s"
-                                        src-dir
-                                        build-dir))
-                      "true")))
-    (compile (concat " jhbuild make"
-                     " &&"
-                     extra-cmd
-                     " &&"
-                     " rc -J " build-dir "/compile_commands.json" ))))
+  (let* ((autotools  (mb-f-projectile-autotools-p t))
+         (module     (projectile-project-name))
+         (src-dir    (projectile-project-root))
+         (build-dir  (format "%s/%s" mb-f-jhbuild-build-path module))
+         (cdcc-cmds  (when autotools
+                       (list (format "cdcc-gen %s" src-dir)
+                             (format "mv %s/compile_commands.json %s"
+                                     src-dir
+                                     build-dir))))
+         (build-cmds (list (format "rc -J %s/" build-dir))))
+    (compile (mb-f-intercalate " && " (append cdcc-cmds build-cmds)))))
 
 (defun mb-f-projectile-regen-rtags-cmake ()
   "Create a `compile_commands.json' file for current project and feed it to rc."
-  (let* ((project-root     (projectile-project-root))
-         (build-dir-prefix (concat "build-" (projectile-project-name)))
-         (build-dir        (make-temp-file build-dir-prefix t "")))
-    (compile (concat "mkdir -p " build-dir
-                     " &&"
-                     " pushd " build-dir
-                     " &&"
-                     " cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON " project-root
-                     " &&"
-                     " rc -J ./compile_commands.json"
-                     " ; popd"))))
+  (let* ((default-directory (projectile-compilation-dir))
+         (command (mb-f-intercalate " && "
+                                    (concat "cmake"
+                                            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                                            (projectile-project-root))
+                                    "rc -J .")))
+    (compile command)))
 
 (defun mb-f-projectile-regen-rtags-meson ()
   "Create a `compile_commands.json' file for current project and feed it to rc."
-  (let* ((build-dir-prefix (concat "build-" (projectile-project-name)))
-         (build-dir        (make-temp-file build-dir-prefix t "")))
-    (compile (concat " pushd " (projectile-project-root)
-                     " &&"
-                     " meson " build-dir
-                     " && "
-                     (format "rc -J %s/compile_commands.json" build-dir)
-                     "; popd"))))
+  (let ((default-directory (projectile-compilation-dir)))
+    (compile "rc -J .")))
 
 (defun mb-f-projectile-autotools-p (&optional only)
   "Predicate that determines if current project is an autotools project.
@@ -497,6 +482,10 @@ Optionally only search as deep as DEPTH."
                  (looking-back "\\blambda\\b.*" nil nil)))
         'after
       nil)))
+
+(defun mb-f-intercalate (sep &rest strings)
+  "Intercalate with SEP all remaining STRINGS."
+  (mapconcat 'identity strings sep))
 
 (provide 'mb-f)
 ;;; mb-f.el ends here

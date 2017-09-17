@@ -637,11 +637,10 @@
                     " [?]"
                   (format " [%s]" (projectile-project-name)))))
   ;; TODO: Make this JHBuild project type work again
-  ;; (projectile-register-project-type 'jhbuild
-  ;;                                   (lambda () nil)
-  ;;                                   :compile "jhbuild make"
-  ;;                                   :test "make check"
-  ;;                                   :run "jhbuild make && jhbuild run ${PWD##*/}")
+  (projectile-register-project-type 'jhbuild '()
+                                    :compile "jhbuild make"
+                                    :test "make check"
+                                    :run "jhbuild make && jhbuild run ${PWD##*/}")
   (projectile-register-project-type 'win-batch
                                     '("build.bat")
                                     :compile "cmd.exe \"/c build\"")
