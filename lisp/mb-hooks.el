@@ -68,6 +68,10 @@
 (with-eval-after-load "ansible"
   (add-hook 'ansible-hook #'mb-hooks--ansible-hook))
 
+;; Auth Source
+(with-eval-after-load 'auth-source
+  (lastpass-auth-source-enable))
+
 ;; Backward Forward
 (with-eval-after-load 'backward-forward
   (defvar backward-forward-mode-map)
@@ -516,6 +520,14 @@
 
 (with-eval-after-load 'json-mode
   (add-hook 'json-mode-hook #'mb-hooks--json-mode))
+
+;; Lastpass
+(with-eval-after-load 'lastpass
+  (if (boundp 'auth-source-backend-parser-functions)
+      (add-hook 'auth-source-backend-parser-functions
+                #'lastpass-auth-source-backend-parse)
+    (advice-add 'auth-source-backend-parse
+                :before-until #'lastpass-auth-source-backend-parse)))
 
 ;; LSP
 (defun mb-hooks--lsp-mode ()
